@@ -2,6 +2,7 @@
 
 const DESCONTO_IRMAOS = 0.05;
 const TAXA_CARTAO_6X = 0.0967;
+const TAXA_CARTAO_AVISTA = 0.04;
 const CUPONS = { CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15 };
 
 // ─── Estado ─────────────────────────────────────────────────────────────────
@@ -201,12 +202,13 @@ function calcularTotais() {
   base -= descontoIrmaos;
   const descontoCupom = cupomAtivo ? Math.round(base * cupomAtivo.pct * 100) / 100 : 0;
   const totalAvista = Math.round((base - descontoCupom) * 100) / 100;
+  const totalCartaoAvista = Math.round(totalAvista / (1 - TAXA_CARTAO_AVISTA) * 100) / 100;
   const totalCartao = Math.round(totalAvista / (1 - TAXA_CARTAO_6X) * 100) / 100;
   const parcela = Math.round(totalCartao / 6 * 100) / 100;
   const sinal = Math.round(totalAvista * 0.30 * 100) / 100;
   const saldo = Math.round((totalAvista - sinal) * 100) / 100;
 
-  return { qtd, preco, descontoIrmaos, descontoCupom, totalAvista, totalCartao, parcela, sinal, saldo };
+  return { qtd, preco, descontoIrmaos, descontoCupom, totalAvista, totalCartaoAvista, totalCartao, parcela, sinal, saldo };
 }
 
 function atualizarResumo() {
@@ -215,7 +217,7 @@ function atualizarResumo() {
   // Atualizar descrições nas opções de pagamento
   document.getElementById("desc-pix-avista").textContent = `R$ ${fmt(t.totalAvista)}`;
   document.getElementById("desc-pix-sinal").textContent = `Sinal: R$ ${fmt(t.sinal)} · Saldo: R$ ${fmt(t.saldo)}`;
-  document.getElementById("desc-cartao-avista").textContent = `R$ ${fmt(t.totalAvista)}`;
+  document.getElementById("desc-cartao-avista").textContent = `R$ ${fmt(t.totalCartaoAvista)}`;
   document.getElementById("desc-cartao").textContent = `6x de R$ ${fmt(t.parcela)} (total R$ ${fmt(t.totalCartao)})`;
 
   // Resumo de valores
@@ -261,7 +263,9 @@ function aplicarCupom() {
 
 function coletarPayload() {
   const t = calcularTotais();
-  const totalFinal = pagamentoTipo === "cartao_parcelado" ? t.totalCartao : t.totalAvista;
+  const totalFinal = pagamentoTipo === "cartao_parcelado" ? t.totalCartao
+    : pagamentoTipo === "cartao_avista" ? t.totalCartaoAvista
+    : t.totalAvista;
 
   const responsavel = {
     nome: v("resp-nome"),
