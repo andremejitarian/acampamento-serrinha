@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscrição — Acampamento Fazenda Serrinha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Banner de topo -->
+  <div class="header-banner" style="background-image: url('https://res.cloudinary.com/ddjlqajrd/image/upload/v1757067076/background_1_nuo0n6.jpg')"></div>
+
+  <!-- Overlay de carregamento -->
+  <div class="overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p class="overlay-text" id="overlayText">Processando inscrição…</p>
+  </div>
+
+  <div class="container">
+    <div class="form-card">
+
+      <!-- Logo -->
+      <div class="logo-container">
+        <img src="https://res.cloudinary.com/ddjlqajrd/image/upload/v1755164802/logo_serrinha_iiva1a.jpg" alt="Fazenda Serrinha" class="logo">
+      </div>
+
+      <!-- Progresso -->
+      <div class="steps-progress">
+        <div class="step-dot active" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+      </div>
+
+      <form id="form" novalidate>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ETAPA 1 — Dados do responsável + crianças
+        ═══════════════════════════════════════════════════════════ -->
+        <div id="step-1">
+
+          <h1 id="eventoNome">Acampamento Fazenda Serrinha</h1>
+          <p style="color:#666;margin-bottom:32px" id="eventoPeriodo">Julho 2026</p>
+
+          <!-- RESPONSÁVEL -->
+          <p class="section-header">Responsável</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="resp-nome">Nome completo *</label>
+              <input type="text" class="form-control" id="resp-nome" required placeholder="Nome do responsável">
+            </div>
+            <div class="form-group">
+              <label for="resp-cpf">CPF *</label>
+              <input type="text" class="form-control" id="resp-cpf" required placeholder="000.000.000-00" maxlength="14">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="resp-email">Email *</label>
+              <input type="email" class="form-control" id="resp-email" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label for="resp-telefone">Telefone / WhatsApp *</label>
+              <input type="tel" class="form-control" id="resp-telefone" required placeholder="(11) 99999-9999" maxlength="15">
+            </div>
+          </div>
+
+          <!-- CRIANÇAS -->
+          <p class="section-header">Crianças</p>
+
+          <div id="criancas-container"></div>
+
+          <button type="button" class="btn btn-add" id="btn-add-crianca">+ Adicionar criança</button>
+
+          <!-- CAMPOS GLOBAIS -->
+          <p class="section-header">Outras informações</p>
+
+          <div class="form-row single">
+            <div class="form-group">
+              <label for="contato-emergencia">Contato de emergência (nome, grau de parentesco e telefone)</label>
+              <textarea class="form-control" id="contato-emergencia" placeholder="Ex: Avó Maria, (11) 98888-7777"></textarea>
+            </div>
+          </div>
+
+          <div class="form-row single">
+            <div class="form-group">
+              <label for="como-soube">Como soube do acampamento?</label>
+              <input type="text" class="form-control" id="como-soube" placeholder="">
+            </div>
+          </div>
+
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="checkbox-item" style="margin-top:8px">
+                <input type="checkbox" id="concordo-desistencia" required>
+                <span>Li e concordo com a <strong>política de desistência</strong> do acampamento. *</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="navigation-buttons">
+            <button type="button" class="btn btn-primary" id="btn-step1-next">Continuar →</button>
+          </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ETAPA 2 — Pagamento
+        ═══════════════════════════════════════════════════════════ -->
+        <div id="step-2" style="display:none">
+
+          <h2>Resumo e pagamento</h2>
+
+          <!-- Resumo de valores -->
+          <div class="summary-box" id="summary-box">
+            <!-- Preenchido pelo JS -->
+          </div>
+
+          <!-- Cupom -->
+          <div class="cupom-row">
+            <div class="form-group">
+              <label for="cupom-input">Cupom de desconto</label>
+              <input type="text" class="form-control" id="cupom-input" placeholder="CUPOM5" style="text-transform:uppercase">
+              <span class="cupom-msg" id="cupom-msg"></span>
+            </div>
+            <button type="button" class="btn btn-outline" id="btn-cupom">Aplicar</button>
+          </div>
+
+          <!-- Forma de pagamento -->
+          <p class="section-header" style="margin-top:8px">Forma de pagamento *</p>
+
+          <div class="radio-group" id="pagamento-group">
+            <label class="radio-item" data-tipo="pix_avista">
+              <input type="radio" name="pagamento" value="pix_avista">
+              <div>
+                <div class="radio-label">PIX — à vista</div>
+                <div class="radio-desc" id="desc-pix-avista">R$ 2.300,00</div>
+              </div>
+            </label>
+            <label class="radio-item" data-tipo="pix_sinal">
+              <input type="radio" name="pagamento" value="pix_sinal">
+              <div>
+                <div class="radio-label">PIX — sinal de 30% + saldo até o check-in</div>
+                <div class="radio-desc" id="desc-pix-sinal">Sinal: R$ 690,00 · Saldo: R$ 1.610,00</div>
+              </div>
+            </label>
+            <label class="radio-item" data-tipo="cartao_parcelado">
+              <input type="radio" name="pagamento" value="cartao_parcelado">
+              <div>
+                <div class="radio-label">Cartão de crédito — até 6x sem juros</div>
+                <div class="radio-desc" id="desc-cartao">6x de R$ 424,67</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="navigation-buttons">
+            <button type="button" class="btn btn-secondary" id="btn-step2-back">← Voltar</button>
+            <button type="button" class="btn btn-primary" id="btn-step2-next">Confirmar inscrição →</button>
+          </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ETAPA 3 — Confirmação
+        ═══════════════════════════════════════════════════════════ -->
+        <div id="step-3" style="display:none">
+
+          <div class="success-container">
+            <div class="success-icon">✓</div>
+            <h2>Inscrição confirmada!</h2>
+            <p id="success-msg">Acesse o link abaixo para efetuar o pagamento.</p>
+            <div class="payment-links" id="payment-links">
+              <!-- Preenchido pelo JS -->
+            </div>
+            <p style="margin-top:24px;font-size:0.85em;color:#999">O link também foi enviado para o seu email e WhatsApp.</p>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Template de criança -->
+  <template id="crianca-template">
+    <div class="child-block" data-idx="0">
+
+      <div class="child-header">
+        <h3>Criança <span class="child-num">1</span></h3>
+        <button type="button" class="btn btn-danger btn-remove-crianca">Remover</button>
+      </div>
+
+      <!-- Dados básicos -->
+      <p class="section-header" style="margin-top:0">Dados</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome completo *</label>
+          <input type="text" class="form-control c-nome" required placeholder="Nome da criança">
+        </div>
+        <div class="form-group">
+          <label>Data de nascimento *</label>
+          <input type="date" class="form-control c-nascimento" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Escola *</label>
+          <input type="text" class="form-control c-escola" required placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Ano escolar *</label>
+          <input type="text" class="form-control c-ano-escolar" required placeholder="Ex: 5º ano">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Endereço completo *</label>
+          <input type="text" class="form-control c-endereco" required placeholder="">
+        </div>
+        <div class="form-group">
+          <label>CEP *</label>
+          <input type="text" class="form-control c-cep" required placeholder="00000-000" maxlength="9">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>RG *</label>
+          <input type="text" class="form-control c-rg" required placeholder="">
+        </div>
+        <div class="form-group">
+          <label>CPF *</label>
+          <input type="text" class="form-control c-cpf" required placeholder="000.000.000-00" maxlength="14">
+        </div>
+      </div>
+
+      <!-- Saúde -->
+      <p class="section-header">Saúde</p>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Alergias severas</label>
+          <textarea class="form-control c-alergias" placeholder="Descreva se houver"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Restrições alimentares</label>
+          <textarea class="form-control c-restricoes-alimentares" placeholder="Descreva se houver"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Restrições a medicação</label>
+          <textarea class="form-control c-restricoes-medicacao" placeholder="Descreva se houver"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Medicação para febre (nome, dose e frequência)</label>
+          <textarea class="form-control c-med-febre" placeholder=""></textarea>
+        </div>
+        <div class="form-group">
+          <label>Medicação para diarreia (nome, dose e frequência)</label>
+          <textarea class="form-control c-med-diarreia" placeholder=""></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Medicação para picada de inseto (nome, dose e frequência)</label>
+          <textarea class="form-control c-med-picada" placeholder=""></textarea>
+        </div>
+        <div class="form-group">
+          <label>Outros medicamentos de uso contínuo</label>
+          <textarea class="form-control c-med-continuo" placeholder=""></textarea>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Condições de saúde (marque todas que se aplicam)</label>
+          <div class="checkbox-group" style="margin-top:6px">
+            <label class="checkbox-item"><input type="checkbox" class="c-cond" value="Diabetes"> Diabetes</label>
+            <label class="checkbox-item"><input type="checkbox" class="c-cond" value="Convulsão"> Convulsão</label>
+            <label class="checkbox-item"><input type="checkbox" class="c-cond" value="Asma ou Bronquite"> Asma ou Bronquite</label>
+            <label class="checkbox-item"><input type="checkbox" class="c-cond" value="Enurese Noturna"> Enurese Noturna</label>
+            <label class="checkbox-item"><input type="checkbox" class="c-cond" value="Sonambulismo"> Sonambulismo</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Convênio médico *</label>
+          <input type="text" class="form-control c-convenio" required placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Número da carteirinha *</label>
+          <input type="text" class="form-control c-num-convenio" required placeholder="">
+        </div>
+      </div>
+
+      <!-- Autorizações -->
+      <p class="section-header">Autorizações</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>A criança está autorizada a nadar? *</label>
+          <div class="checkbox-group" style="margin-top:6px;flex-direction:row;gap:24px">
+            <label class="checkbox-item"><input type="radio" class="c-nadar" name="nadar-PLACEHOLDER" value="sim" required> Sim</label>
+            <label class="checkbox-item"><input type="radio" class="c-nadar" name="nadar-PLACEHOLDER" value="nao"> Não</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>A criança pode dormir em beliche? *</label>
+          <div class="checkbox-group" style="margin-top:6px;flex-direction:row;gap:24px">
+            <label class="checkbox-item"><input type="radio" class="c-beliche" name="beliche-PLACEHOLDER" value="sim" required> Sim</label>
+            <label class="checkbox-item"><input type="radio" class="c-beliche" name="beliche-PLACEHOLDER" value="nao"> Não</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Informações adicionais sobre a criança</label>
+          <textarea class="form-control c-info-adicional" placeholder="Qualquer informação relevante para a equipe"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="checkbox-item">
+            <input type="checkbox" class="c-autorizo-participacao" required>
+            <span>Autorizo a participação do(a) meu(minha) filho(a) no Acampamento Fazenda Serrinha e declaro que as informações acima são verdadeiras. *</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row single">
+        <div class="form-group">
+          <label>Autorizo o uso de imagem *</label>
+          <div class="checkbox-group" style="margin-top:6px;flex-direction:row;gap:24px">
+            <label class="checkbox-item"><input type="radio" class="c-uso-imagem" name="imagem-PLACEHOLDER" value="sim" required> Sim</label>
+            <label class="checkbox-item"><input type="radio" class="c-uso-imagem" name="imagem-PLACEHOLDER" value="nao"> Não</label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
