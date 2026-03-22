@@ -215,6 +215,7 @@ function atualizarResumo() {
   // Atualizar descrições nas opções de pagamento
   document.getElementById("desc-pix-avista").textContent = `R$ ${fmt(t.totalAvista)}`;
   document.getElementById("desc-pix-sinal").textContent = `Sinal: R$ ${fmt(t.sinal)} · Saldo: R$ ${fmt(t.saldo)}`;
+  document.getElementById("desc-cartao-avista").textContent = `R$ ${fmt(t.totalAvista)}`;
   document.getElementById("desc-cartao").textContent = `6x de R$ ${fmt(t.parcela)} (total R$ ${fmt(t.totalCartao)})`;
 
   // Resumo de valores
