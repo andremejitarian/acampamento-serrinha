@@ -328,6 +328,10 @@ select.form-control { cursor: pointer; }
 .cupom-msg.ok { color: var(--color-green); }
 .cupom-msg.err { color: var(--color-red); }
 
+.field-msg { font-size: 0.85em; margin-top: 4px; display: block; }
+.field-msg.ok { color: var(--color-green); }
+.field-msg.err { color: var(--color-red); }
+
 /* ─── Loading Overlay ───────────────────────────────────────────────────── */
 .overlay {
   display: none;

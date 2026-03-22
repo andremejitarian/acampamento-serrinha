@@ -1,3 +1,47 @@
+// ─── Validação de CPF ────────────────────────────────────────────────────────
+
+function isValidCpf(cpf) {
+  const c = cpf.replace(/\D/g, "");
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(c[i]) * (10 - i);
+  let r = 11 - (sum % 11);
+  if ((r >= 10 ? 0 : r) !== parseInt(c[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(c[i]) * (11 - i);
+  r = 11 - (sum % 11);
+  return (r >= 10 ? 0 : r) === parseInt(c[10]);
+}
+
+// ─── Validação de email ───────────────────────────────────────────────────────
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// ─── Busca de CEP ─────────────────────────────────────────────────────────────
+
+async function buscarEnderecoPorCep(cep) {
+  const cepLimpo = cep.replace(/\D/g, "");
+  if (cepLimpo.length !== 8) return null;
+  try {
+    return await Promise.any([
+      fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`).then(async r => {
+        const d = await r.json();
+        if (d.erro) throw new Error("não encontrado");
+        return { logradouro: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf };
+      }),
+      fetch(`https://brasilapi.com.br/api/cep/v2/${cepLimpo}`).then(async r => {
+        const d = await r.json();
+        if (d.name === "CepPromiseError") throw new Error("não encontrado");
+        return { logradouro: d.street, bairro: d.neighborhood, cidade: d.city, estado: d.state };
+      }),
+    ]);
+  } catch {
+    return null;
+  }
+}
+
 // ─── Constantes ────────────────────────────────────────────────────────────
 
 const DESCONTO_IRMAOS = 0.05;
@@ -57,12 +101,68 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Formatação de CPF e telefone
+  // Formatação
   document.getElementById("resp-cpf").addEventListener("input", (e) => {
     e.target.value = formatCpf(e.target.value);
   });
   document.getElementById("resp-telefone").addEventListener("input", (e) => {
     e.target.value = formatTelefone(e.target.value);
+  });
+  document.getElementById("resp-cep").addEventListener("input", (e) => {
+    e.target.value = formatCep(e.target.value);
+  });
+
+  // Validação on blur
+  document.getElementById("resp-cpf").addEventListener("blur", () => {
+    const input = document.getElementById("resp-cpf");
+    const msg = document.getElementById("cpf-msg");
+    if (!input.value.trim()) return;
+    if (isValidCpf(input.value)) {
+      msg.textContent = "CPF válido";
+      msg.className = "field-msg ok";
+      clearError(input);
+    } else {
+      msg.textContent = "CPF inválido";
+      msg.className = "field-msg err";
+      markError(input);
+    }
+  });
+
+  document.getElementById("resp-email").addEventListener("blur", () => {
+    const input = document.getElementById("resp-email");
+    const msg = document.getElementById("email-msg");
+    if (!input.value.trim()) return;
+    if (isValidEmail(input.value)) {
+      msg.textContent = "";
+      msg.className = "field-msg";
+      clearError(input);
+    } else {
+      msg.textContent = "Email inválido";
+      msg.className = "field-msg err";
+      markError(input);
+    }
+  });
+
+  document.getElementById("resp-cep").addEventListener("blur", async (e) => {
+    const input = e.target;
+    const msg = document.getElementById("cep-msg");
+    if (input.value.replace(/\D/g, "").length !== 8) return;
+    msg.textContent = "Buscando…";
+    msg.className = "field-msg";
+    const dados = await buscarEnderecoPorCep(input.value);
+    if (dados) {
+      if (dados.logradouro) document.getElementById("resp-endereco").value = dados.logradouro;
+      if (dados.bairro) document.getElementById("resp-bairro").value = dados.bairro;
+      if (dados.cidade) document.getElementById("resp-cidade").value = dados.cidade;
+      if (dados.estado) document.getElementById("resp-estado").value = dados.estado.toUpperCase();
+      msg.textContent = "";
+      msg.className = "field-msg";
+      clearError(input);
+      document.getElementById("resp-numero").focus();
+    } else {
+      msg.textContent = "CEP não encontrado. Preencha o endereço manualmente.";
+      msg.className = "field-msg err";
+    }
   });
 });
 
@@ -90,9 +190,6 @@ function addCrianca() {
   // CPF formatting
   block.querySelector(".c-cpf").addEventListener("input", (e) => {
     e.target.value = formatCpf(e.target.value);
-  });
-  block.querySelector(".c-cep").addEventListener("input", (e) => {
-    e.target.value = formatCep(e.target.value);
   });
 
   document.getElementById("criancas-container").appendChild(clone);
@@ -146,12 +243,33 @@ function goToStep2() {
 function validateStep1() {
   let ok = true;
 
-  const required = ["resp-nome", "resp-cpf", "resp-email", "resp-telefone"];
+  const required = ["resp-nome", "resp-cpf", "resp-email", "resp-telefone",
+                    "resp-cep", "resp-endereco", "resp-numero", "resp-bairro", "resp-cidade", "resp-estado"];
   required.forEach(id => {
     const el = document.getElementById(id);
     if (!el.value.trim()) { markError(el); ok = false; }
     else clearError(el);
   });
+
+  // CPF
+  const cpfInput = document.getElementById("resp-cpf");
+  const cpfMsg = document.getElementById("cpf-msg");
+  if (cpfInput.value.trim() && !isValidCpf(cpfInput.value)) {
+    markError(cpfInput);
+    cpfMsg.textContent = "CPF inválido";
+    cpfMsg.className = "field-msg err";
+    ok = false;
+  }
+
+  // Email
+  const emailInput = document.getElementById("resp-email");
+  const emailMsg = document.getElementById("email-msg");
+  if (emailInput.value.trim() && !isValidEmail(emailInput.value.trim())) {
+    markError(emailInput);
+    emailMsg.textContent = "Email inválido";
+    emailMsg.className = "field-msg err";
+    ok = false;
+  }
 
   if (!document.getElementById("concordo-desistencia").checked) {
     alert("Por favor, confirme que leu e concorda com a política de desistência.");
@@ -164,7 +282,7 @@ function validateStep1() {
 
   blocos.forEach(block => {
     const reqFields = ["c-nome", "c-nascimento", "c-escola", "c-ano-escolar",
-                       "c-endereco", "c-cep", "c-rg", "c-cpf", "c-convenio", "c-num-convenio"];
+                       "c-rg", "c-cpf", "c-convenio", "c-num-convenio"];
     reqFields.forEach(cls => {
       const el = block.querySelector(`.${cls}`);
       if (el && !el.value.trim()) { markError(el); ok = false; }
@@ -272,6 +390,13 @@ function coletarPayload() {
     cpf: v("resp-cpf"),
     email: v("resp-email"),
     telefone: v("resp-telefone").replace(/\D/g, ""),
+    cep: v("resp-cep"),
+    endereco: v("resp-endereco"),
+    numero: v("resp-numero"),
+    complemento: v("resp-complemento"),
+    bairro: v("resp-bairro"),
+    cidade: v("resp-cidade"),
+    estado: v("resp-estado"),
   };
 
   const blocos = document.querySelectorAll(".child-block");
@@ -280,8 +405,6 @@ function coletarPayload() {
     dataNascimento: qv(block, ".c-nascimento"),
     escola: qv(block, ".c-escola"),
     anoEscolar: qv(block, ".c-ano-escolar"),
-    endereco: qv(block, ".c-endereco"),
-    cep: qv(block, ".c-cep"),
     rg: qv(block, ".c-rg"),
     cpf: qv(block, ".c-cpf"),
     saude: {
