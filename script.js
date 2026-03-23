@@ -85,10 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("btn-step1-next").addEventListener("click", goToStep2);
   document.getElementById("btn-step2-back").addEventListener("click", () => goToStep(1));
   document.getElementById("btn-step2-next").addEventListener("click", submitForm);
-  document.getElementById("btn-cupom").addEventListener("click", aplicarCupom);
-  document.getElementById("cupom-input").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); aplicarCupom(); }
-  });
+  document.getElementById("cupom-input").addEventListener("input", aplicarCupom);
 
   // Selecionar forma de pagamento ao clicar no radio-item
   document.getElementById("pagamento-group").addEventListener("change", (e) => {
@@ -187,9 +184,18 @@ function addCrianca() {
   if (idx === 0) removeBtn.style.display = "none";
   removeBtn.addEventListener("click", () => removeCrianca(idx));
 
-  // CPF formatting
-  block.querySelector(".c-cpf").addEventListener("input", (e) => {
+  // CPF formatting + validation
+  const cpfField = block.querySelector(".c-cpf");
+  cpfField.addEventListener("input", (e) => {
     e.target.value = formatCpf(e.target.value);
+  });
+  cpfField.addEventListener("blur", (e) => {
+    if (!e.target.value.trim()) return;
+    if (isValidCpf(e.target.value)) {
+      clearError(e.target);
+    } else {
+      markError(e.target);
+    }
   });
 
   document.getElementById("criancas-container").appendChild(clone);
@@ -288,6 +294,12 @@ function validateStep1() {
       if (el && !el.value.trim()) { markError(el); ok = false; }
       else if (el) clearError(el);
     });
+
+    const cpfEl = block.querySelector(".c-cpf");
+    if (cpfEl && cpfEl.value.trim() && !isValidCpf(cpfEl.value)) {
+      markError(cpfEl);
+      ok = false;
+    }
 
     // Autorizo participação
     if (!block.querySelector(".c-autorizo-participacao").checked) {
@@ -466,7 +478,7 @@ async function submitForm() {
 
   const payload = coletarPayload();
 
-  showLoading("Criando sua inscrição…");
+  showLoading();
 
   try {
     const resp = await fetch(config.webhookUrl, {
@@ -517,12 +529,28 @@ function showConfirmacao(link1, link2, totalFinal, totalAvista) {
 
 // ─── Loading ─────────────────────────────────────────────────────────────────
 
-function showLoading(text) {
-  document.getElementById("overlayText").textContent = text;
+const LOADING_MESSAGES = [
+  "Criando sua inscrição…",
+  "Isso pode levar alguns segundos, já já fica pronto.",
+  "Estamos gerando o link de pagamento para você…",
+];
+
+let loadingInterval = null;
+
+function showLoading() {
+  let idx = 0;
+  const el = document.getElementById("overlayText");
+  el.textContent = LOADING_MESSAGES[0];
   document.getElementById("loadingOverlay").classList.add("visible");
+  loadingInterval = setInterval(() => {
+    idx = (idx + 1) % LOADING_MESSAGES.length;
+    el.textContent = LOADING_MESSAGES[idx];
+  }, 7000);
 }
 
 function hideLoading() {
+  clearInterval(loadingInterval);
+  loadingInterval = null;
   document.getElementById("loadingOverlay").classList.remove("visible");
 }
 
