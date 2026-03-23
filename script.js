@@ -301,9 +301,23 @@ function validateStep1() {
       ok = false;
     }
 
+    // Radios obrigatórios
+    if (!block.querySelector(".c-nadar:checked")) {
+      alert("Informe se a criança está autorizada a nadar.");
+      ok = false;
+    }
+    if (!block.querySelector(".c-beliche:checked")) {
+      alert("Informe se a criança pode dormir em beliche.");
+      ok = false;
+    }
+    if (!block.querySelector(".c-uso-imagem:checked")) {
+      alert("Informe a autorização de uso de imagem para todas as crianças.");
+      ok = false;
+    }
+
     // Autorizo participação
     if (!block.querySelector(".c-autorizo-participacao").checked) {
-      alert(`Confirme a autorização de participação para todas as crianças.`);
+      alert("Confirme a autorização de participação para todas as crianças.");
       ok = false;
     }
   });
