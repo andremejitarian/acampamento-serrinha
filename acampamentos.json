@@ -5,7 +5,7 @@
     "event_id": "641ab0ac-430e-4e78-b07a-cb47218b1579",
     "nome": "Acampamento Fazenda Serrinha",
     "subtitulo": "Julho 2026",
-    "periodo": "1 a 5 de julho de 2026",
+    "periodo": "Checkin 01/07 as 9h Checkout 05/07 as 13h",
     "dataPagamentoFinal": "2026-07-01",
     "precoPorCrianca": 2300,
     "webhookUrl": "https://andremejitarian--pranna-webhook-server-fastapi-app.modal.run/api/webhooks/prod/fazenda-serrinha/fazenda-acampamento-inscricao?secret=6f0a9e372a658fede926e6b001a92b431b98bdc5c6034dbf274a076ac98949f1&sync=true"
