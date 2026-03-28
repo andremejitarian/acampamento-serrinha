@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Formatação
+  // Formatação — Responsável 1
   document.getElementById("resp-cpf").addEventListener("input", (e) => {
     e.target.value = formatCpf(e.target.value);
   });
@@ -109,7 +109,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.target.value = formatCep(e.target.value);
   });
 
-  // Validação on blur
+  // Formatação — Responsável 2
+  document.getElementById("resp2-cpf").addEventListener("input", (e) => {
+    e.target.value = formatCpf(e.target.value);
+  });
+  document.getElementById("resp2-telefone").addEventListener("input", (e) => {
+    e.target.value = formatTelefone(e.target.value);
+  });
+
+  // Validação on blur — Responsável 1
   document.getElementById("resp-cpf").addEventListener("blur", () => {
     const input = document.getElementById("resp-cpf");
     const msg = document.getElementById("cpf-msg");
@@ -128,6 +136,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("resp-email").addEventListener("blur", () => {
     const input = document.getElementById("resp-email");
     const msg = document.getElementById("email-msg");
+    if (!input.value.trim()) return;
+    if (isValidEmail(input.value)) {
+      msg.textContent = "";
+      msg.className = "field-msg";
+      clearError(input);
+    } else {
+      msg.textContent = "Email inválido";
+      msg.className = "field-msg err";
+      markError(input);
+    }
+  });
+
+  // Validação on blur — Responsável 2
+  document.getElementById("resp2-cpf").addEventListener("blur", () => {
+    const input = document.getElementById("resp2-cpf");
+    const msg = document.getElementById("cpf2-msg");
+    if (!input.value.trim()) return;
+    if (isValidCpf(input.value)) {
+      msg.textContent = "CPF válido";
+      msg.className = "field-msg ok";
+      clearError(input);
+    } else {
+      msg.textContent = "CPF inválido";
+      msg.className = "field-msg err";
+      markError(input);
+    }
+  });
+
+  document.getElementById("resp2-email").addEventListener("blur", () => {
+    const input = document.getElementById("resp2-email");
+    const msg = document.getElementById("email2-msg");
     if (!input.value.trim()) return;
     if (isValidEmail(input.value)) {
       msg.textContent = "";
@@ -257,7 +296,7 @@ function validateStep1() {
     else clearError(el);
   });
 
-  // CPF
+  // CPF — Responsável 1
   const cpfInput = document.getElementById("resp-cpf");
   const cpfMsg = document.getElementById("cpf-msg");
   if (cpfInput.value.trim() && !isValidCpf(cpfInput.value)) {
@@ -267,13 +306,41 @@ function validateStep1() {
     ok = false;
   }
 
-  // Email
+  // Email — Responsável 1
   const emailInput = document.getElementById("resp-email");
   const emailMsg = document.getElementById("email-msg");
   if (emailInput.value.trim() && !isValidEmail(emailInput.value.trim())) {
     markError(emailInput);
     emailMsg.textContent = "Email inválido";
     emailMsg.className = "field-msg err";
+    ok = false;
+  }
+
+  // Responsável 2 — obrigatórios: nome, CPF, telefone
+  const required2 = ["resp2-nome", "resp2-cpf", "resp2-telefone"];
+  required2.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { markError(el); ok = false; }
+    else clearError(el);
+  });
+
+  // CPF — Responsável 2
+  const cpf2Input = document.getElementById("resp2-cpf");
+  const cpf2Msg = document.getElementById("cpf2-msg");
+  if (cpf2Input.value.trim() && !isValidCpf(cpf2Input.value)) {
+    markError(cpf2Input);
+    cpf2Msg.textContent = "CPF inválido";
+    cpf2Msg.className = "field-msg err";
+    ok = false;
+  }
+
+  // Email — Responsável 2 (opcional, mas valida se preenchido)
+  const email2Input = document.getElementById("resp2-email");
+  const email2Msg = document.getElementById("email2-msg");
+  if (email2Input.value.trim() && !isValidEmail(email2Input.value.trim())) {
+    markError(email2Input);
+    email2Msg.textContent = "Email inválido";
+    email2Msg.className = "field-msg err";
     ok = false;
   }
 
@@ -425,6 +492,13 @@ function coletarPayload() {
     estado: v("resp-estado"),
   };
 
+  const responsavel2 = {
+    nome: v("resp2-nome"),
+    cpf: v("resp2-cpf"),
+    email: v("resp2-email"),
+    telefone: v("resp2-telefone").replace(/\D/g, ""),
+  };
+
   const blocos = document.querySelectorAll(".child-block");
   const criancasData = Array.from(blocos).map(block => ({
     nome: qv(block, ".c-nome"),
@@ -466,6 +540,7 @@ function coletarPayload() {
       dataPagamentoFinal: config.dataPagamentoFinal,
     },
     responsavel,
+    responsavel2,
     criancas: criancasData,
     pagamento: { tipo: pagamentoTipo },
     totais: {

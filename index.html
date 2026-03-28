@@ -45,8 +45,8 @@
           <h1 id="eventoNome">Acampamento Fazenda Serrinha</h1>
           <p style="color:#666;margin-bottom:32px" id="eventoPeriodo">Julho 2026</p>
 
-          <!-- RESPONSÁVEL -->
-          <p class="section-header">Responsável</p>
+          <!-- RESPONSÁVEL 1 -->
+          <p class="section-header">Responsável 1</p>
 
           <div class="form-row">
             <div class="form-group">
@@ -113,6 +113,33 @@
             <div class="form-group">
               <label for="resp-complemento">Complemento</label>
               <input type="text" class="form-control" id="resp-complemento" placeholder="Apto, bloco... (opcional)">
+            </div>
+          </div>
+
+          <!-- RESPONSÁVEL 2 -->
+          <p class="section-header">Responsável 2</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="resp2-nome">Nome completo *</label>
+              <input type="text" class="form-control" id="resp2-nome" required placeholder="Nome do responsável">
+            </div>
+            <div class="form-group">
+              <label for="resp2-cpf">CPF *</label>
+              <input type="text" class="form-control" id="resp2-cpf" required placeholder="000.000.000-00" maxlength="14">
+              <span class="field-msg" id="cpf2-msg"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="resp2-email">Email</label>
+              <input type="email" class="form-control" id="resp2-email" placeholder="seu@email.com">
+              <span class="field-msg" id="email2-msg"></span>
+            </div>
+            <div class="form-group">
+              <label for="resp2-telefone">Telefone / WhatsApp *</label>
+              <input type="tel" class="form-control" id="resp2-telefone" required placeholder="(11) 99999-9999" maxlength="15">
             </div>
           </div>
 
