@@ -150,6 +150,18 @@ select.form-control { cursor: pointer; }
 .form-control.valid { border-color: var(--color-green); }
 .error-msg { font-size: 0.8em; color: var(--color-red); margin-top: 2px; display: none; }
 .error-msg.visible { display: block; }
+.form-group.error > label:first-of-type,
+.form-group.error > label.checkbox-item { color: var(--color-red); }
+.form-group.error .checkbox-group {
+  outline: 2px solid var(--color-red);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.radio-group.error {
+  outline: 2px solid var(--color-red);
+  border-radius: 8px;
+  padding: 4px;
+}
 
 /* ─── Checkboxes ────────────────────────────────────────────────────────── */
 .checkbox-group {

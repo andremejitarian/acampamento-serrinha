@@ -344,9 +344,12 @@ function validateStep1() {
     ok = false;
   }
 
-  if (!document.getElementById("concordo-desistencia").checked) {
-    alert("Por favor, confirme que leu e concorda com a política de desistência.");
+  const concordoEl = document.getElementById("concordo-desistencia");
+  if (!concordoEl.checked) {
+    markGroupError(concordoEl.closest(".form-group"));
     ok = false;
+  } else {
+    clearGroupError(concordoEl.closest(".form-group"));
   }
 
   // Validar cada criança
@@ -369,39 +372,57 @@ function validateStep1() {
     }
 
     // Radios obrigatórios
+    const nadarGroup = block.querySelector(".c-nadar").closest(".form-group");
     if (!block.querySelector(".c-nadar:checked")) {
-      alert("Informe se a criança está autorizada a nadar.");
-      ok = false;
-    }
+      markGroupError(nadarGroup); ok = false;
+    } else clearGroupError(nadarGroup);
+
+    const belicheGroup = block.querySelector(".c-beliche").closest(".form-group");
     if (!block.querySelector(".c-beliche:checked")) {
-      alert("Informe se a criança pode dormir em beliche.");
-      ok = false;
-    }
+      markGroupError(belicheGroup); ok = false;
+    } else clearGroupError(belicheGroup);
+
+    const imagemGroup = block.querySelector(".c-uso-imagem").closest(".form-group");
     if (!block.querySelector(".c-uso-imagem:checked")) {
-      alert("Informe a autorização de uso de imagem para todas as crianças.");
-      ok = false;
-    }
+      markGroupError(imagemGroup); ok = false;
+    } else clearGroupError(imagemGroup);
 
     // Autorizo participação
-    if (!block.querySelector(".c-autorizo-participacao").checked) {
-      alert("Confirme a autorização de participação para todas as crianças.");
-      ok = false;
-    }
+    const participacaoEl = block.querySelector(".c-autorizo-participacao");
+    if (!participacaoEl.checked) {
+      markGroupError(participacaoEl.closest(".form-group")); ok = false;
+    } else clearGroupError(participacaoEl.closest(".form-group"));
   });
 
+  if (!ok) scrollToFirstError();
   return ok;
 }
 
 function validateStep2() {
+  const pagamentoGroup = document.getElementById("pagamento-group");
   if (!pagamentoTipo) {
-    alert("Selecione uma forma de pagamento.");
+    markGroupError(pagamentoGroup);
+    scrollToFirstError();
     return false;
   }
+  clearGroupError(pagamentoGroup);
   return true;
 }
 
 function markError(el) { el.classList.add("error"); el.classList.remove("valid"); }
 function clearError(el) { el.classList.remove("error"); el.classList.add("valid"); }
+function markGroupError(groupEl) { groupEl.classList.add("error"); }
+function clearGroupError(groupEl) { groupEl.classList.remove("error"); }
+
+function scrollToFirstError() {
+  const firstError = document.querySelector(".error");
+  if (!firstError) return;
+  firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  const focusable = firstError.matches("input, select, textarea")
+    ? firstError
+    : firstError.querySelector("input, select, textarea");
+  if (focusable) focusable.focus({ preventScroll: true });
+}
 
 // ─── Cálculo de preços ───────────────────────────────────────────────────────
 
