@@ -47,7 +47,7 @@ async function buscarEnderecoPorCep(cep) {
 const DESCONTO_IRMAOS = 0.05;
 const TAXA_CARTAO_6X = 0.0967;
 const TAXA_CARTAO_AVISTA = 0.04;
-const CUPONS = { CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15 };
+const CUPONS = { CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15, CUPOM50: 0.50 };
 
 // ─── Estado ─────────────────────────────────────────────────────────────────
 
