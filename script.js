@@ -47,11 +47,9 @@ async function buscarEnderecoPorCep(cep) {
 const DESCONTO_IRMAOS = 0.05;
 const TAXA_CARTAO_6X = 0.0967;
 const TAXA_CARTAO_AVISTA = 0.04;
-// Cupons demais desativados (uso indevido) — reativar quando o André pedir.
+// Cupons desativados (uso indevido) — reativar quando o André pedir.
 // Valores originais: CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15, CUPOM35: 0.35, CUPOM50: 0.50
-const CUPONS = {
-  CUPOM15: 0.15,
-};
+const CUPONS = {};
 
 // ─── Estado ─────────────────────────────────────────────────────────────────
 
