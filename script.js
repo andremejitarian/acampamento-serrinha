@@ -49,7 +49,8 @@ const TAXA_CARTAO_6X = 0.0967;
 const TAXA_CARTAO_AVISTA = 0.04;
 // Cupons: só CUPOM50 ativo (reativado a pedido). Demais desativados por uso indevido.
 // Valores originais: CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15, CUPOM35: 0.35, CUPOM50: 0.50
-const CUPONS = { CUPOM50: 0.50 };
+// GAEL3DIAS: 30% — amiga do Gael, fica só 3 dos 4,5 dias (jul/2026)
+const CUPONS = { CUPOM50: 0.50, GAEL3DIAS: 0.30 };
 
 // ─── Estado ─────────────────────────────────────────────────────────────────
 
