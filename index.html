@@ -28,14 +28,23 @@
         <img src="https://res.cloudinary.com/ddjlqajrd/image/upload/v1755164802/logo_serrinha_iiva1a.jpg" alt="Fazenda Serrinha" class="logo">
       </div>
 
+      <!-- ░░░ INSCRIÇÕES ENCERRADAS — bloco temporário (acampamento lotado) ░░░
+           Para REATIVAR o formulário: apague este bloco <div class="encerrado-banner">…</div>
+           e remova o style="display:none" do <div class="steps-progress"> e do <form id="form">. -->
+      <div class="encerrado-banner" style="text-align:center;padding:48px 24px;margin:24px 0;border:1px solid #e5e5e5;border-radius:12px;background:#faf8f5">
+        <div style="font-size:48px;line-height:1;margin-bottom:16px">🏕️</div>
+        <h1 style="margin:0 0 12px">Inscrições encerradas</h1>
+        <p style="color:#666;margin:0">O Acampamento Fazenda Serrinha — Julho 2026 está com as vagas esgotadas.<br>Obrigado pelo interesse! Em breve abriremos novas datas.</p>
+      </div>
+
       <!-- Progresso -->
-      <div class="steps-progress">
+      <div class="steps-progress" style="display:none">
         <div class="step-dot active" id="dot-1"></div>
         <div class="step-dot" id="dot-2"></div>
         <div class="step-dot" id="dot-3"></div>
       </div>
 
-      <form id="form" novalidate>
+      <form id="form" novalidate style="display:none">
 
         <!-- ═══════════════════════════════════════════════════════════
              ETAPA 1 — Dados do responsável + crianças
