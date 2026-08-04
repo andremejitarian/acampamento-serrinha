@@ -15,23 +15,26 @@ function isValidCpf(cpf) {
 
 // ─── Validação de email ───────────────────────────────────────────────────────
 
-// Celular BR: DDD 11 a 99 + nono dígito 9 + 8 dígitos.
-// Existe porque o form só mascarava o telefone e aceitava qualquer coisa: um
-// inscrito digitou "(11) 94778-471" (um dígito a menos), o back montou
-// "+551194778471" e a API do WhatsApp ACEITOU o envio — a confirmação sumiu
-// sem erro nenhum, dos dois lados. 10 dígitos aqui é telefone fixo, que não
-// recebe WhatsApp, e é por esse número que a confirmação da inscrição chega.
+// Telefone BR: CELULAR (11 dígitos, com o 9) ou FIXO (10 dígitos, 2-5).
+// Existe porque o form só mascarava o telefone e aceitava qualquer coisa: num
+// form irmão um inscrito digitou "(11) 94778-471" (um dígito a menos), o back
+// montou "+551194778471" e a API do WhatsApp ACEITOU o envio — a confirmação
+// sumiu sem erro nenhum, dos dois lados.
+// FIXO é aceito de propósito: empresa usando fixo no WhatsApp Business é caso
+// real. O que denuncia o erro não é o comprimento, é o primeiro dígito do
+// assinante — 10 dígitos começando com 9 é celular a que falta um dígito
+// (ian-memory#137).
 function isValidCelularBR(value) {
-  return /^[1-9][1-9]9\d{8}$/.test(String(value || "").replace(/\D/g, ""));
+  return /^[1-9][1-9](9\d{8}|[2-5]\d{7})$/.test(String(value || "").replace(/\D/g, ""));
 }
 
-// A mensagem diz o motivo E o formato, porque o erro mais comum é um dígito a
-// menos — que passa despercebido relendo o número.
+// Mensagem específica para o caso que motivou tudo: celular truncado passa
+// despercebido relendo o número, e o texto genérico não ajudaria a achá-lo.
 function mensagemCelularBR(value) {
   const digits = String(value || "").replace(/\D/g, "");
-  return digits.length > 0 && digits.length < 11
+  return digits.length === 10 && digits[2] === "9"
     ? "Faltam dígitos: o celular tem 11, com o DDD. Ex.: (11) 91234-5678"
-    : "Informe um celular com DDD e o 9 na frente. É por ele que a confirmação da inscrição chega no WhatsApp.";
+    : "Informe o telefone com DDD. Celular tem 11 dígitos, com o 9 na frente; fixo tem 10. É por ele que a confirmação da inscrição chega no WhatsApp.";
 }
 
 function isValidEmail(email) {
@@ -749,11 +752,18 @@ function formatCpf(value) {
     .slice(0, 14);
 }
 
+// Formata celular (11) e FIXO (10). A versão anterior só punha hífen com 9
+// dígitos depois do DDD, então telefone comercial saía "(11) 30635557" — sem
+// hífen e com cara de errado, empurrando quem tem fixo a digitar outra coisa
+// (ian-memory#137).
 function formatTelefone(value) {
-  return value.replace(/\D/g, "")
-    .replace(/^(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d{4})$/, "$1-$2")
-    .slice(0, 15);
+  const d = String(value || "").replace(/\D/g, "").slice(0, 11);
+  if (d.length < 3) return d;
+  const ddd = d.slice(0, 2);
+  const resto = d.slice(2);
+  if (resto.length <= 4) return `(${ddd}) ${resto}`;
+  if (d.length <= 10) return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;
+  return `(${ddd}) ${resto.slice(0, 5)}-${resto.slice(5)}`;
 }
 
 function formatCep(value) {
