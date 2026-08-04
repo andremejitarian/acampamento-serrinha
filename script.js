@@ -15,6 +15,25 @@ function isValidCpf(cpf) {
 
 // ─── Validação de email ───────────────────────────────────────────────────────
 
+// Celular BR: DDD 11 a 99 + nono dígito 9 + 8 dígitos.
+// Existe porque o form só mascarava o telefone e aceitava qualquer coisa: um
+// inscrito digitou "(11) 94778-471" (um dígito a menos), o back montou
+// "+551194778471" e a API do WhatsApp ACEITOU o envio — a confirmação sumiu
+// sem erro nenhum, dos dois lados. 10 dígitos aqui é telefone fixo, que não
+// recebe WhatsApp, e é por esse número que a confirmação da inscrição chega.
+function isValidCelularBR(value) {
+  return /^[1-9][1-9]9\d{8}$/.test(String(value || "").replace(/\D/g, ""));
+}
+
+// A mensagem diz o motivo E o formato, porque o erro mais comum é um dígito a
+// menos — que passa despercebido relendo o número.
+function mensagemCelularBR(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length > 0 && digits.length < 11
+    ? "Faltam dígitos: o celular tem 11, com o DDD. Ex.: (11) 91234-5678"
+    : "Informe um celular com DDD e o 9 na frente. É por ele que a confirmação da inscrição chega no WhatsApp.";
+}
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -108,6 +127,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("resp-telefone").addEventListener("input", (e) => {
     e.target.value = formatTelefone(e.target.value);
   });
+  document.getElementById("resp-telefone").addEventListener("blur", () => {
+    validateTelefoneField("resp-telefone", "telefone-msg");
+  });
   document.getElementById("resp-cep").addEventListener("input", (e) => {
     e.target.value = formatCep(e.target.value);
   });
@@ -118,6 +140,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   document.getElementById("resp2-telefone").addEventListener("input", (e) => {
     e.target.value = formatTelefone(e.target.value);
+  });
+  document.getElementById("resp2-telefone").addEventListener("blur", () => {
+    validateTelefoneField("resp2-telefone", "telefone2-msg");
   });
 
   // Validação on blur — Responsável 1
@@ -288,6 +313,22 @@ function goToStep2() {
 
 // ─── Validação ───────────────────────────────────────────────────────────────
 
+// Valida um campo de telefone e escreve o feedback ao lado dele.
+// Retorna true/false para o gate do passo 1.
+function validateTelefoneField(inputId, msgId) {
+  const input = document.getElementById(inputId);
+  const msg = document.getElementById(msgId);
+  if (!input.value.trim()) { if (msg) { msg.textContent = ""; msg.className = "field-msg"; } return false; }
+  if (isValidCelularBR(input.value)) {
+    if (msg) { msg.textContent = "Celular válido"; msg.className = "field-msg ok"; }
+    clearError(input);
+    return true;
+  }
+  if (msg) { msg.textContent = mensagemCelularBR(input.value); msg.className = "field-msg err"; }
+  markError(input);
+  return false;
+}
+
 function validateStep1() {
   let ok = true;
 
@@ -319,6 +360,10 @@ function validateStep1() {
     ok = false;
   }
 
+  // Telefone — Responsável 1 (canal de confirmação: precisa ser celular)
+  const telInput = document.getElementById("resp-telefone");
+  if (telInput.value.trim() && !validateTelefoneField("resp-telefone", "telefone-msg")) ok = false;
+
   // Responsável 2 — obrigatórios: nome, CPF, telefone
   const required2 = ["resp2-nome", "resp2-cpf", "resp2-telefone"];
   required2.forEach(id => {
@@ -336,6 +381,10 @@ function validateStep1() {
     cpf2Msg.className = "field-msg err";
     ok = false;
   }
+
+  // Telefone — Responsável 2 (canal de confirmação: precisa ser celular)
+  const tel2Input = document.getElementById("resp2-telefone");
+  if (tel2Input.value.trim() && !validateTelefoneField("resp2-telefone", "telefone2-msg")) ok = false;
 
   // Email — Responsável 2 (opcional, mas valida se preenchido)
   const email2Input = document.getElementById("resp2-email");
