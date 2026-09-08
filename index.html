@@ -28,23 +28,23 @@
         <img src="https://res.cloudinary.com/ddjlqajrd/image/upload/v1755164802/logo_serrinha_iiva1a.jpg" alt="Fazenda Serrinha" class="logo">
       </div>
 
-      <!-- ░░░ INSCRIÇÕES ENCERRADAS — bloco temporário (acampamento lotado) ░░░
-           Para REATIVAR o formulário: apague este bloco <div class="encerrado-banner">…</div>
-           e remova o style="display:none" do <div class="steps-progress"> e do <form id="form">. -->
-      <div class="encerrado-banner" style="text-align:center;padding:48px 24px;margin:24px 0;border:1px solid #e5e5e5;border-radius:12px;background:#faf8f5">
+      <!-- Inscrições encerradas. Quem liga e desliga é o campo `status` da edição
+           no acampamentos.json, lido pelo script.js. Não editar este bloco na mão. -->
+      <div class="encerrado-banner" id="encerrado-banner" style="display:none;text-align:center;padding:48px 24px;margin:24px 0;border:1px solid #e5e5e5;border-radius:12px;background:#faf8f5">
         <div style="font-size:48px;line-height:1;margin-bottom:16px">🏕️</div>
         <h1 style="margin:0 0 12px">Inscrições encerradas</h1>
-        <p style="color:#666;margin:0">O Acampamento Fazenda Serrinha — Julho 2026 está com as vagas esgotadas.<br>Obrigado pelo interesse! Em breve abriremos novas datas.</p>
+        <p style="color:#666;margin:0" id="encerrado-texto"></p>
+        <p style="color:#666;margin:8px 0 0">Obrigado pelo interesse! Em breve abriremos novas datas.</p>
       </div>
 
       <!-- Progresso -->
-      <div class="steps-progress" style="display:none">
+      <div class="steps-progress">
         <div class="step-dot active" id="dot-1"></div>
         <div class="step-dot" id="dot-2"></div>
         <div class="step-dot" id="dot-3"></div>
       </div>
 
-      <form id="form" novalidate style="display:none">
+      <form id="form" novalidate>
 
         <!-- ═══════════════════════════════════════════════════════════
              ETAPA 1 — Dados do responsável + crianças
@@ -233,28 +233,28 @@
               <input type="radio" name="pagamento" value="pix_avista">
               <div>
                 <div class="radio-label">PIX — à vista</div>
-                <div class="radio-desc" id="desc-pix-avista">R$ 2.300,00</div>
+                <div class="radio-desc" id="desc-pix-avista">—</div>
               </div>
             </label>
             <label class="radio-item" data-tipo="pix_sinal">
               <input type="radio" name="pagamento" value="pix_sinal">
               <div>
-                <div class="radio-label">PIX — sinal de 30% + saldo até o check-in</div>
-                <div class="radio-desc" id="desc-pix-sinal">Sinal: R$ 690,00 · Saldo: R$ 1.610,00</div>
+                <div class="radio-label">PIX — sinal de 30% + saldo até o check-out</div>
+                <div class="radio-desc" id="desc-pix-sinal">—</div>
               </div>
             </label>
             <label class="radio-item" data-tipo="cartao_avista">
               <input type="radio" name="pagamento" value="cartao_avista">
               <div>
                 <div class="radio-label">Cartão de crédito — à vista</div>
-                <div class="radio-desc" id="desc-cartao-avista">R$ 2.300,00</div>
+                <div class="radio-desc" id="desc-cartao-avista">—</div>
               </div>
             </label>
             <label class="radio-item" data-tipo="cartao_parcelado">
               <input type="radio" name="pagamento" value="cartao_parcelado">
               <div>
                 <div class="radio-label">Cartão de crédito — até 6x sem juros</div>
-                <div class="radio-desc" id="desc-cartao">6x de R$ 424,67</div>
+                <div class="radio-desc" id="desc-cartao">—</div>
               </div>
             </label>
           </div>

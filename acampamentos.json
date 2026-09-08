@@ -8,6 +8,31 @@
     "periodo": "Checkin 01/07 as 9h Checkout 05/07 as 13h",
     "dataPagamentoFinal": "2026-07-01",
     "precoPorCrianca": 2300,
+    "webhookUrl": "https://andremejitarian--pranna-webhook-server-fastapi-app.modal.run/api/webhooks/prod/fazenda-serrinha/fazenda-acampamento-inscricao?secret=8e02afd83cb725882e600768377f19a4899a61e750ae2f7c&sync=true",
+    "status": "encerrado",
+    "cupons": {},
+    "data_inicio": "2026-07-01"
+  },
+  "A002": {
+    "id": "A002",
+    "edicao": "2701",
+    "status": "aberto",
+    "nome": "Acampamento Fazenda Serrinha",
+    "subtitulo": "Janeiro 2027",
+    "periodo": "Checkin 18/01 as 9h Checkout 22/01 as 13h",
+    "data_inicio": "2027-01-18",
+    "dataPagamentoFinal": "2027-01-22",
+    "precoPorCrianca": 2415,
+    "descontoAntecipado": {
+      "pct": 0.1,
+      "prazo": "2026-10-31",
+      "formas": [
+        "pix_avista",
+        "pix_sinal"
+      ],
+      "rotulo": "Condicao antecipada (10%)"
+    },
+    "cupons": {},
     "webhookUrl": "https://andremejitarian--pranna-webhook-server-fastapi-app.modal.run/api/webhooks/prod/fazenda-serrinha/fazenda-acampamento-inscricao?secret=8e02afd83cb725882e600768377f19a4899a61e750ae2f7c&sync=true"
   }
 }

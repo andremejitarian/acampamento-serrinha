@@ -69,10 +69,13 @@ async function buscarEnderecoPorCep(cep) {
 const DESCONTO_IRMAOS = 0.05;
 const TAXA_CARTAO_6X = 0.0967;
 const TAXA_CARTAO_AVISTA = 0.04;
-// Cupons: só CUPOM50 ativo (reativado a pedido). Demais desativados por uso indevido.
-// Valores originais: CUPOM5: 0.05, CUPOM10: 0.10, CUPOM15: 0.15, CUPOM35: 0.35, CUPOM50: 0.50
-// GAEL3DIAS: 30% — amiga do Gael, fica só 3 dos 4,5 dias (jul/2026)
-const CUPONS = { CUPOM50: 0.50, GAEL3DIAS: 0.30 };
+// Cupons vivem no acampamentos.json, no campo `cupons` de CADA edição, para que
+// um cupom de julho não valha em janeiro. Formato: { "CODIGO": 0.15 }. Continuam
+// client-side, então continuam visíveis no código-fonte: são alavanca comercial
+// pontual, não segredo. Jul/2026 usou CUPOM50 (0.50) e GAEL3DIAS (0.30).
+function cuponsDaEdicao() {
+  return (config && config.cupons) || {};
+}
 
 // ─── Estado ─────────────────────────────────────────────────────────────────
 
@@ -84,9 +87,12 @@ let currentStep = 1;
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 
+// Edição padrão de quem abre o link sem `?evento=`. Trocar aqui a cada edição nova.
+const EDICAO_PADRAO = "A002";
+
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
-  const eventoId = params.get("evento") || "A001";
+  const eventoId = params.get("evento") || EDICAO_PADRAO;
 
   try {
     const resp = await fetch("acampamentos.json");
@@ -101,6 +107,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.title = `Inscrição — ${config.nome}`;
   document.getElementById("eventoNome").textContent = config.nome;
   document.getElementById("eventoPeriodo").textContent = config.periodo;
+
+  // Fechar e reabrir inscrição é DADO da edição (`status`), não edição de HTML.
+  // Em jun/2026 fechar o formulário custou um commit que escondia o <form> na mão.
+  if (config.status && config.status !== "aberto") {
+    mostrarEncerrado();
+    return;
+  }
 
   // Adicionar primeira criança
   addCrianca();
@@ -481,6 +494,22 @@ function scrollToFirstError() {
 
 // ─── Cálculo de preços ───────────────────────────────────────────────────────
 
+// Hoje em BRT, no formato ISO. O prazo do desconto antecipado é uma data de
+// calendário, então comparar strings YYYY-MM-DD evita a armadilha do fuso.
+function hojeISOBRT() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+}
+
+// O desconto antecipado premia quem paga cedo E em PIX. Por isso ele NÃO entra na
+// base do cartão: quem parcela já recebe o benefício do prazo, e o gross-up do
+// cartão repassa o custo do meio de pagamento (padrão da casa desde 13/08/2026).
+function descontoAntecipadoVigente() {
+  const d = config && config.descontoAntecipado;
+  if (!d || !d.pct) return null;
+  if (d.prazo && hojeISOBRT() > d.prazo) return null;
+  return d;
+}
+
 function calcularTotais() {
   const preco = config.precoPorCrianca;
   const qtd = document.querySelectorAll(".child-block").length;
@@ -488,22 +517,37 @@ function calcularTotais() {
   const descontoIrmaos = qtd > 1 ? Math.round(base * DESCONTO_IRMAOS * 100) / 100 : 0;
   base -= descontoIrmaos;
   const descontoCupom = cupomAtivo ? Math.round(base * cupomAtivo.pct * 100) / 100 : 0;
-  const totalAvista = Math.round((base - descontoCupom) * 100) / 100;
-  const totalCartaoAvista = Math.round(totalAvista / (1 - TAXA_CARTAO_AVISTA) * 100) / 100;
-  const totalCartao = Math.round(totalAvista / (1 - TAXA_CARTAO_6X) * 100) / 100;
+  base = Math.round((base - descontoCupom) * 100) / 100;
+
+  const antecipado = descontoAntecipadoVigente();
+  const descontoAntecipado = antecipado ? Math.round(base * antecipado.pct * 100) / 100 : 0;
+
+  // totalAvista é o valor PIX, e segue sendo a referência do sinal/saldo no
+  // backend (acampamento-inscricao.ts lê totais.totalAvista para o pix_sinal).
+  const totalAvista = Math.round((base - descontoAntecipado) * 100) / 100;
+  const totalCartaoAvista = Math.round(base / (1 - TAXA_CARTAO_AVISTA) * 100) / 100;
+  const totalCartao = Math.round(base / (1 - TAXA_CARTAO_6X) * 100) / 100;
   const parcela = Math.round(totalCartao / 6 * 100) / 100;
   const sinal = Math.round(totalAvista * 0.30 * 100) / 100;
   const saldo = Math.round((totalAvista - sinal) * 100) / 100;
 
-  return { qtd, preco, descontoIrmaos, descontoCupom, totalAvista, totalCartaoAvista, totalCartao, parcela, sinal, saldo };
+  return { qtd, preco, base, descontoIrmaos, descontoCupom, descontoAntecipado,
+           pctAntecipado: antecipado ? antecipado.pct : 0,
+           totalAvista, totalCartaoAvista, totalCartao, parcela, sinal, saldo };
 }
 
 function atualizarResumo() {
   const t = calcularTotais();
+  const antecipado = descontoAntecipadoVigente();
+  const pctStr = `${(t.pctAntecipado * 100).toFixed(0)}%`;
 
   // Atualizar descrições nas opções de pagamento
-  document.getElementById("desc-pix-avista").textContent = `R$ ${fmt(t.totalAvista)}`;
-  document.getElementById("desc-pix-sinal").textContent = `Sinal: R$ ${fmt(t.sinal)} · Saldo: R$ ${fmt(t.saldo)}`;
+  document.getElementById("desc-pix-avista").textContent = t.descontoAntecipado > 0
+    ? `R$ ${fmt(t.totalAvista)} — já com ${pctStr} de desconto`
+    : `R$ ${fmt(t.totalAvista)}`;
+  document.getElementById("desc-pix-sinal").textContent =
+    `Sinal: R$ ${fmt(t.sinal)} · Saldo: R$ ${fmt(t.saldo)} até ${formatDatePtBR(config.dataPagamentoFinal)}` +
+    (t.descontoAntecipado > 0 ? ` — já com ${pctStr} de desconto` : "");
   document.getElementById("desc-cartao-avista").textContent = `R$ ${fmt(t.totalCartaoAvista)}`;
   document.getElementById("desc-cartao").textContent = `6x de R$ ${fmt(t.parcela)} (total R$ ${fmt(t.totalCartao)})`;
 
@@ -514,7 +558,11 @@ function atualizarResumo() {
     html += `<div class="summary-row discount"><span>Desconto irmãos (5%)</span><span>− R$ ${fmt(t.descontoIrmaos)}</span></div>`;
   if (t.descontoCupom > 0)
     html += `<div class="summary-row discount"><span>Cupom ${cupomAtivo.codigo} (${(cupomAtivo.pct * 100).toFixed(0)}%)</span><span>− R$ ${fmt(t.descontoCupom)}</span></div>`;
+  if (t.descontoAntecipado > 0)
+    html += `<div class="summary-row discount"><span>Desconto por pagamento antecipado em PIX (${pctStr})</span><span>− R$ ${fmt(t.descontoAntecipado)}</span></div>`;
   html += `<div class="summary-row total"><span>Total à vista (PIX)</span><span>R$ ${fmt(t.totalAvista)}</span></div>`;
+  if (antecipado && antecipado.prazo)
+    html += `<div class="summary-row" style="font-size:0.85em;color:#666"><span>O desconto de ${pctStr} vale para inscrições em PIX até ${formatDatePtBR(antecipado.prazo)}. No cartão o valor é o cheio.</span><span></span></div>`;
   box.innerHTML = html;
 }
 
@@ -532,7 +580,7 @@ function aplicarCupom() {
     return;
   }
 
-  const pct = CUPONS[codigo];
+  const pct = cuponsDaEdicao()[codigo];
   if (pct) {
     cupomAtivo = { codigo, pct };
     msg.textContent = `Cupom aplicado: ${(pct * 100).toFixed(0)}% de desconto.`;
@@ -613,6 +661,7 @@ function coletarPayload() {
       event_id: config.event_id,
       nome: config.nome,
       periodo: config.periodo,
+      data_inicio: config.data_inicio,
       dataPagamentoFinal: config.dataPagamentoFinal,
     },
     responsavel,
@@ -625,6 +674,8 @@ function coletarPayload() {
       descontoIrmaos: t.descontoIrmaos,
       descontoCupom: t.descontoCupom,
       cupom: cupomAtivo?.codigo ?? null,
+      descontoAntecipado: t.descontoAntecipado,
+      pctAntecipado: t.pctAntecipado,
       totalAvista: t.totalAvista,
       totalFinal,
     },
@@ -720,6 +771,15 @@ function hideLoading() {
 }
 
 // ─── Utilitários ─────────────────────────────────────────────────────────────
+
+function mostrarEncerrado() {
+  document.querySelector(".steps-progress").style.display = "none";
+  document.getElementById("form").style.display = "none";
+  const banner = document.getElementById("encerrado-banner");
+  document.getElementById("encerrado-texto").textContent =
+    `O ${config.nome} — ${config.subtitulo} está com as inscrições encerradas.`;
+  banner.style.display = "block";
+}
 
 function gerarCodigoInscricao(edicao) {
   const sufixo = Date.now().toString(36).slice(-4).toUpperCase();
