@@ -776,8 +776,25 @@ function mostrarEncerrado() {
   document.querySelector(".steps-progress").style.display = "none";
   document.getElementById("form").style.display = "none";
   const banner = document.getElementById("encerrado-banner");
-  document.getElementById("encerrado-texto").textContent =
-    `O ${config.nome} — ${config.subtitulo} está com as inscrições encerradas.`;
+  const destino = config.novoLinkInscricao;
+  if (destino) {
+    // Edição que mudou de formulário: as inscrições seguem abertas em outro
+    // lugar. Sem isto o aviso diria "encerradas" e quem tem o link antigo
+    // concluiria que o acampamento lotou.
+    banner.querySelector("h1").textContent = "As inscrições mudaram de endereço";
+    document.getElementById("encerrado-texto").textContent =
+      `As inscrições do ${config.nome} — ${config.subtitulo} continuam abertas, agora em um formulário novo.`;
+    const extra = document.getElementById("encerrado-extra");
+    extra.textContent = "";
+    const a = document.createElement("a");
+    a.href = destino;
+    a.textContent = "Fazer a inscrição";
+    a.style.cssText = "display:inline-block;margin-top:16px;padding:12px 24px;border-radius:8px;background:#4a6b3a;color:#fff;text-decoration:none;font-weight:600";
+    extra.appendChild(a);
+  } else {
+    document.getElementById("encerrado-texto").textContent =
+      `O ${config.nome} — ${config.subtitulo} está com as inscrições encerradas.`;
+  }
   banner.style.display = "block";
 }
 
